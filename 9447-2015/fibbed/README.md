@@ -1,6 +1,6 @@
 # Fibbed
 
-This problem involves decrypting a flag that was encrypted using a Diffie Hellman scheme. The key consists of the pair `(r, e)`. Here, `r` is public matrix in `Z_p`, and `e` is a secret, random element of `Z_p`.
+This problem involves decrypting a flag that was encrypted using a Diffie Hellman scheme. The key consists of the pair `(r, e)`. Here, `r` is a public matrix in `Z_p`, and `e` is a secret, random element of `Z_p`.
 
 The pcap gives us the following:
 
