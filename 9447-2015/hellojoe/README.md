@@ -44,7 +44,8 @@ verify_funcs = [
 # verifier function
 vc_set = set()
 vc_set.update([c for c in '0123456789abcdef{}'])
-# sets1 represent the constraints from the first verifier function which simply ensures the flag is in the format 9447{...}
+# sets1 represent the constraints from the first verifier function,
+# which simply ensures the flag is in the format 9447{...}
 sets1 = [{'9'},{'4'},{'4'},{'7'},{'{'}]
 for i in xrange(32):
     sets1.append(vc_set)
