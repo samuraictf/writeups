@@ -16,6 +16,6 @@ We first make the observation that if we choose `M = chr(128) | chr(129) | ... |
 
 We can use this fact to determine what vertices are reachable from the vertices associated with the secret. Consider `M` with `M[0]` set to `chr(255)`. If `V_128` is not referenced in the secret, then none of the path lengths will change, and the signature will remain the same. However, if `V_128` is reachable, then one of the paths will have longer length, and the signature will increase.
 
-We use this process to find two root nodes, `r_1` and `r_2` for the directed graph of the signature we're trying to forge. We can them simply swap these two nodes to produce a second message that results in the required signature.
+We use this process to find two root nodes, `r_1` and `r_2` for the directed graph of the signature we're trying to forge. We can then simply swap these two nodes to produce a second message that results in the required signature.
 
 We use the oracle to determine the signature of this message, then submit it, resulting in the flag: `9447{Th1s_ta5k_WAs_a_B1T_0F_A_DaG}`
