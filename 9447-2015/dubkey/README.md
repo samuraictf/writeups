@@ -16,6 +16,6 @@ We first make the observation that if we choose `M = chr(128) | chr(129) | ... |
 
 We can use this fact to determine what vertices are reachable from the vertices associated with the secret. Consider `M` with `M[0]` set to `chr(255)`. If `V_128` is not referenced in the secret, then none of the path lengths will change, and the signature will remain the same. However, if `V_128` is reachable, then one of the paths will have longer length, and the signature will increase.
 
-We use this process to find two root nodes, `r_1` and `r_2` for the directed graph of the signature we're trying to forge. We start by computing the lengths of the longest paths with `r_1` and `r_2` as their initial vertex, which we can then use to trivially forge the required signature.
+We use this process to find two root nodes, `r_1` and `r_2` for the directed graph of the signature we're trying to forge. We can them simply swap these two nodes to produce a second message that results in the required signature.
 
-Submitting this signature gives us the flag: `9447{Th1s_ta5k_WAs_a_B1T_0F_A_DaG}`
+Submitting this message gives us the flag: `9447{Th1s_ta5k_WAs_a_B1T_0F_A_DaG}`
