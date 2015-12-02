@@ -18,4 +18,4 @@ We can use this fact to determine what vertices are reachable from the vertices 
 
 We use this process to find two root nodes, `r_1` and `r_2` for the directed graph of the signature we're trying to forge. We can them simply swap these two nodes to produce a second message that results in the required signature.
 
-Submitting this message gives us the flag: `9447{Th1s_ta5k_WAs_a_B1T_0F_A_DaG}`
+We use the oracle to determine the signature of this message, then submit it, resulting in the flag: `9447{Th1s_ta5k_WAs_a_B1T_0F_A_DaG}`
