@@ -31,4 +31,4 @@ def calcM(p, l, base):
   r = calcM(p, e, (0, 1))
   ```
   
-Looking carefully at the implementation, it is clear that for the base `(0, 1)`, this computes `Q^e (mod p)`, where `Q` is the [Fibonacci Q-Matrix](http://mathworld.wolfram.com/FibonacciQ-Matrix.html). Since we know that [Binet's Formula](http://mathworld.wolfram.com/BinetsFibonacciNumberFormula.html) is a closed-form solution to the Fibonacci sequence, we can use its inverse to compute `e` from `r`. This gives us that `e` is `152333692332446539`, which we can use to decrypt the ciphertext: `9447{Pisan0_mU5t_nEv3r_hAve_THougHt_0f_bruTe_f0rce5}`
+Looking carefully at the implementation, it is clear that for the base `(0, 1)`, this computes `Q^e (mod p)`, where `Q` is the [Fibonacci Q-Matrix](http://mathworld.wolfram.com/FibonacciQ-Matrix.html). Since we know that [Binet's Formula](http://mathworld.wolfram.com/BinetsFibonacciNumberFormula.html) is a closed-form solution to the Fibonacci sequence, we can use its inverse to compute `e` from `r`. This gives us that `e` is `152106608687469950`, which we can use to decrypt the ciphertext: `9447{Pisan0_mU5t_nEv3r_hAve_THougHt_0f_bruTe_f0rce5}`
