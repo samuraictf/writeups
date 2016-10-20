@@ -1,0 +1,26 @@
+# redacted
+
+We're given an SSH private keys, but some of the characters in the base64 string are replaced with x's. Luckily, it looks like while the modulus was partially lost, all of `p` and `q` were intact. I used `openssl asn1parse -in someotherkey.pem` to give me the offsets of `p` and `q` in another key, and I extracted them with python. Then I used the following script to recreate a working SSH key:
+
+```
+#!/usr/bin/env python2
+
+import gmpy
+from Crypto.PublicKey import RSA
+
+p = 160715260849342318931136112813341037345926969012288227225240875622403009493539093929333081548188459992247771680452063593583756278915740193557402138743266217376005578973188641800583345510266770139969709567420846366801788060791738229180205729066714584288249507088921482835100030743352147986722422517067206563539
+
+q = 156522822773738162417254450203271175855220146400024771706084276654684994055624152101542626647589634389361232150411812572776336649201321449632016603858688896275125914484326556417817195311471437215701390750315213065194536381852437122083849274951300180499399546807140772435452395099516509211865918104434503784667
+
+n = long(p*q)
+phi = (p-1)*(q-1)
+
+e = long(0x10001)
+
+d = long(gmpy.invert(e, phi))
+
+rsa = RSA.construct((n, e, d))
+open('key', 'w').write(rsa.exportKey())
+```
+
+I was then able to run `ssh -p 1504 -i key berlin@cthulhu.fluxfingers.net` to get the flag: flag{thought_ssh_privkeys_are_secure?}
