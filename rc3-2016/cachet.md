@@ -1,7 +1,7 @@
 #### Cachet, a web challenge from RC3 CTF 2016
 ---
 
-Cachet was a messaging service where the user can send messages (encrypted on the client) to others. A PIN, verified by the server, is required before you can view an encrypted message. 
+Cachet was a messaging service where the user can send messages (encrypted and decrypted on the client) to others. A PIN, verified by the server, is required before you can view an encrypted message. 
 
 The source code for the challenge itself is available at https://drive.google.com/file/d/0B3HqJpgroLZxMHBGU1QtcVc4UUU/view.
 
