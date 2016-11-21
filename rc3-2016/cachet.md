@@ -3,6 +3,8 @@
 
 Cachet was a messaging service where the user can send messages (encrypted on the client) to others. A PIN, verified by the server, is required before you can view an encrypted message. 
 
+The source code for the challenge itself is available at https://drive.google.com/file/d/0B3HqJpgroLZxMHBGU1QtcVc4UUU/view.
+
 tl;dr: XSS the user to get their private key, abuse an old Apache server on another port to get the HttpOnly cookie and thus the encrypted flag.
 
 We quickly found an XSS vulnerability in the PGP message itself. This is only sent to the client after the PIN is confirmed, but this turned out to be irrelevant.
